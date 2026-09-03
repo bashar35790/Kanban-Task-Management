@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Build output
+.next/
+dist/
+out/
+build/
+
+# Prisma generated client (matches at any depth, e.g. backend/src/generated/prisma/)
+**/generated/prisma/
+
+# Logs
+*.log
+npm-debug.log*
+server.pid
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
