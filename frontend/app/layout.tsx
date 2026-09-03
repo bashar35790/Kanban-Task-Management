@@ -10,7 +10,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "TASK — Kanban & Workflow Management",
-  description: "Modern intuitive Kanban board with fluid drag-and-drop collaboration",
+  description:
+    "Modern intuitive Kanban board with fluid drag-and-drop collaboration",
 };
 
 export default function RootLayout({
@@ -20,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans selection:bg-pink-100 selection:text-pink-900">
+      <body
+        className="min-h-full flex flex-col font-sans selection:bg-pink-100 selection:text-pink-900"
+        cz-shortcut-listen="true"
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

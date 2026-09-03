@@ -37,6 +37,8 @@ services:
       DIRECT_URL: postgresql://postgres:postgres@postgres:5432/kanban?schema=public
       BETTER_AUTH_SECRET: local-dev-secret-minimum-32-chars-here
       BETTER_AUTH_URL: http://localhost:5000
+      # Google OAuth: values come from backend/.env (mounted at /app/.env).
+      # Set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET on your host platform for production.
       NODE_ENV: development
       FRONTEND_URL: http://localhost:3000
       PORT: 5000

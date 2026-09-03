@@ -6,6 +6,7 @@ import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 export function LoginForm() {
   const router = useRouter();
@@ -38,7 +39,16 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      <GoogleSignInButton label="Continue with Google" />
+
+      <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <span className="h-px flex-1 bg-slate-200" />
+        or
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <Input
         name="email"
         type="email"
@@ -76,6 +86,7 @@ export function LoginForm() {
           Sign up
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   );
 }
