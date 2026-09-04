@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Sign in — TASK Kanban",
+  title: "Sign in - TASK Kanban",
 };
 
 export default function LoginPage() {

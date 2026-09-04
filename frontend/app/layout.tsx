@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TASK — Kanban & Workflow Management",
+  title: "TASK - Kanban & Workflow Management",
   description:
     "Modern intuitive Kanban board with fluid drag-and-drop collaboration",
 };

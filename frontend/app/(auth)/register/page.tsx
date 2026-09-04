@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Sign up — TASK Kanban",
+  title: "Sign up - TASK Kanban",
 };
 
 export default function RegisterPage() {
