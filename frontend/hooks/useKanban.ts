@@ -122,6 +122,32 @@ export function useDeleteColumn(boardId: string) {
   });
 }
 
+export function useUpdateColumn(boardId: string) {
+  const queryClient = useQueryClient();
+  const key = ["board", boardId];
+
+  return useMutation({
+    mutationFn: async ({
+      columnId,
+      title,
+      position,
+    }: {
+      columnId: string;
+      title?: string;
+      position?: number;
+    }) => {
+      const data = await apiFetch<{ column: Column }>(`/columns/${columnId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title, position }),
+      });
+      return data.column;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
 export type AddTaskInput = {
   columnId: string;
   title: string;
@@ -150,6 +176,36 @@ export function useAddTask(boardId: string) {
           }),
         }
       );
+      return data.task;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+export function useUpdateTask(boardId: string) {
+  const queryClient = useQueryClient();
+  const key = ["board", boardId];
+
+  return useMutation({
+    mutationFn: async ({
+      taskId,
+      ...input
+    }: {
+      taskId: string;
+      title?: string;
+      description?: string | null;
+      category?: string;
+      dueDate?: string | null;
+      commentsCount?: number;
+      attachmentsCount?: number;
+      assigneeId?: string | null;
+    }) => {
+      const data = await apiFetch<{ task: Task }>(`/tasks/${taskId}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      });
       return data.task;
     },
     onSuccess: () => {

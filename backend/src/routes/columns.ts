@@ -24,6 +24,31 @@ async function getBoardIdForColumn(columnId: string): Promise<string | null> {
   return column?.boardId ?? null;
 }
 
+async function requireColumnEditor(
+  boardId: string,
+  userId: string,
+  res: any,
+): Promise<boolean> {
+  const board = await prisma.board.findUnique({
+    where: { id: boardId },
+    select: { ownerId: true },
+  });
+
+  if (board && board.ownerId === userId) {
+    return true;
+  }
+
+  const member = await prisma.boardMember.findUnique({
+    where: { boardId_userId: { boardId, userId } },
+  });
+
+  if (!member || member.role === "VIEWER") {
+    res.status(403).json({ error: "Forbidden: EDITOR or OWNER required" });
+    return false;
+  }
+  return true;
+}
+
 // PATCH /api/v1/columns/:columnId - update title and/or position (EDITOR+)
 router.patch(
   "/:columnId",
@@ -41,16 +66,7 @@ router.patch(
         return;
       }
 
-      req.params.boardId = boardId;
-
-      const member = await prisma.boardMember.findUnique({
-        where: { boardId_userId: { boardId, userId: req.user!.id } },
-      });
-
-      if (!member || ["VIEWER"].includes(member.role)) {
-        res.status(403).json({ error: "Forbidden: EDITOR or OWNER required" });
-        return;
-      }
+      if (!(await requireColumnEditor(boardId, req.user!.id, res))) return;
 
       const column = await prisma.column.update({
         where: { id: p(req.params.columnId) },
@@ -87,14 +103,7 @@ router.delete(
         return;
       }
 
-      const member = await prisma.boardMember.findUnique({
-        where: { boardId_userId: { boardId, userId: req.user!.id } },
-      });
-
-      if (!member || member.role === "VIEWER") {
-        res.status(403).json({ error: "Forbidden: EDITOR or OWNER required" });
-        return;
-      }
+      if (!(await requireColumnEditor(boardId, req.user!.id, res))) return;
 
       await prisma.column.delete({ where: { id: p(req.params.columnId) } });
       res.status(204).send();

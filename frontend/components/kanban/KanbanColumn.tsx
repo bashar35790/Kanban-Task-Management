@@ -11,19 +11,34 @@ type KanbanColumnProps = {
   column: Column;
   canEdit: boolean;
   onDeleteColumn: () => void;
+  onUpdateColumnTitle?: (title: string) => void;
   onAddTask: (title: string, category: string, assignee: string) => void;
   onDeleteTask: (task: Task) => void;
+  onEditTask?: (task: Task) => void;
 };
 
 export function KanbanColumn({
   column,
   canEdit,
   onDeleteColumn,
+  onUpdateColumnTitle,
   onAddTask,
   onDeleteTask,
+  onEditTask,
 }: KanbanColumnProps) {
   const [showCreateCard, setShowCreateCard] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(column.title);
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
+
+  const handleTitleSubmit = () => {
+    setIsEditingTitle(false);
+    if (titleInput.trim() && titleInput.trim() !== column.title) {
+      onUpdateColumnTitle?.(titleInput.trim());
+    } else {
+      setTitleInput(column.title);
+    }
+  };
 
   return (
     <div
@@ -33,14 +48,51 @@ export function KanbanColumn({
       }`}
     >
       <div className="mb-3 flex items-center justify-between px-2 pt-1">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-slate-800 tracking-tight">{column.title}</h3>
-          <span className="text-xs font-semibold text-slate-400">
+        <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              onBlur={handleTitleSubmit}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleTitleSubmit();
+                if (e.key === "Escape") {
+                  setTitleInput(column.title);
+                  setIsEditingTitle(false);
+                }
+              }}
+              autoFocus
+              className="h-7 w-full rounded-lg border border-indigo-400 bg-white px-2 text-sm font-bold text-slate-800 shadow-xs focus:outline-none"
+            />
+          ) : (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3
+                onDoubleClick={() => canEdit && setIsEditingTitle(true)}
+                title={canEdit ? "Double-click to rename" : undefined}
+                className="text-sm font-bold text-slate-800 tracking-tight truncate cursor-default"
+              >
+                {column.title}
+              </h3>
+              {canEdit ? (
+                <button
+                  onClick={() => setIsEditingTitle(true)}
+                  title="Rename column"
+                  className="text-slate-300 hover:text-indigo-600 rounded p-0.5 transition-colors cursor-pointer"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              ) : null}
+            </div>
+          )}
+          <span className="text-xs font-semibold text-slate-400 shrink-0">
             {column.tasks.length}
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {canEdit ? (
             <button
               onClick={onDeleteColumn}
@@ -67,6 +119,7 @@ export function KanbanColumn({
             <KanbanTask
               key={task.id}
               task={task}
+              onEdit={canEdit && onEditTask ? () => onEditTask(task) : undefined}
               onDelete={canEdit ? () => onDeleteTask(task) : undefined}
             />
           ))}

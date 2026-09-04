@@ -8,8 +8,10 @@ import { useBoard } from "@/hooks/useBoard";
 import {
   useMoveTask,
   useAddColumn,
+  useUpdateColumn,
   useDeleteColumn,
   useAddTask,
+  useUpdateTask,
   useDeleteTask,
 } from "@/hooks/useKanban";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
@@ -39,8 +41,10 @@ export default function BoardPage() {
 
   const moveTask = useMoveTask(boardId);
   const addColumn = useAddColumn(boardId);
+  const updateColumn = useUpdateColumn(boardId);
   const deleteColumn = useDeleteColumn(boardId);
   const addTask = useAddTask(boardId);
+  const updateTask = useUpdateTask(boardId);
   const deleteTask = useDeleteTask(boardId);
 
   const board = data?.board;
@@ -341,6 +345,9 @@ export default function BoardPage() {
                   onMoveTask={moveTask.mutate}
                   onAddColumn={addColumn.mutate}
                   onDeleteColumn={handleDeleteColumn}
+                  onUpdateColumn={(columnId, title) =>
+                    updateColumn.mutate({ columnId, title })
+                  }
                   onAddTask={(columnId, title, category, assignee) =>
                     addTask.mutate({
                       columnId,
@@ -350,6 +357,9 @@ export default function BoardPage() {
                     })
                   }
                   onDeleteTask={(task) => deleteTask.mutate(task.id)}
+                  onUpdateTask={async (taskId, data) => {
+                    await updateTask.mutateAsync({ taskId, ...data });
+                  }}
                 />
               </div>
             ) : null}

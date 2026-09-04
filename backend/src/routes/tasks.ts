@@ -46,15 +46,114 @@ async function requireEditor(
   userId: string,
   res: any,
 ): Promise<boolean> {
+  const board = await prisma.board.findUnique({
+    where: { id: boardId },
+    select: { ownerId: true },
+  });
+
+  if (board && board.ownerId === userId) {
+    return true;
+  }
+
   const member = await prisma.boardMember.findUnique({
     where: { boardId_userId: { boardId, userId } },
   });
+
   if (!member || member.role === "VIEWER") {
     res.status(403).json({ error: "Forbidden: EDITOR or OWNER required" });
     return false;
   }
   return true;
 }
+
+async function requireViewer(
+  boardId: string,
+  userId: string,
+  res: any,
+): Promise<boolean> {
+  const board = await prisma.board.findUnique({
+    where: { id: boardId },
+    select: { ownerId: true },
+  });
+
+  if (board && board.ownerId === userId) {
+    return true;
+  }
+
+  const member = await prisma.boardMember.findUnique({
+    where: { boardId_userId: { boardId, userId } },
+  });
+
+  if (!member) {
+    res.status(403).json({ error: "Forbidden: Access denied" });
+    return false;
+  }
+  return true;
+}
+
+// GET /api/v1/columns/:columnId/tasks - list tasks in column (VIEWER+)
+router.get(
+  "/columns/:columnId/tasks",
+  authenticate,
+  param("columnId").isUUID().withMessage("Invalid columnId"),
+  async (req, res) => {
+    if (sendValidationErrors(req, res)) return;
+
+    try {
+      const boardId = await getBoardIdForColumn(p(req.params.columnId));
+      if (!boardId) {
+        res.status(404).json({ error: "Column not found" });
+        return;
+      }
+
+      if (!(await requireViewer(boardId, req.user!.id, res))) return;
+
+      const tasks = await prisma.task.findMany({
+        where: { columnId: p(req.params.columnId) },
+        orderBy: { position: "asc" },
+      });
+
+      res.json({ tasks });
+    } catch (error) {
+      console.error("Get tasks error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// GET /api/v1/tasks/:taskId - get single task (VIEWER+)
+router.get(
+  "/:taskId",
+  authenticate,
+  param("taskId").isUUID().withMessage("Invalid taskId"),
+  async (req, res) => {
+    if (sendValidationErrors(req, res)) return;
+
+    try {
+      const task = await prisma.task.findUnique({
+        where: { id: p(req.params.taskId) },
+      });
+
+      if (!task) {
+        res.status(404).json({ error: "Task not found" });
+        return;
+      }
+
+      const boardId = await getBoardIdForTask(task.id);
+      if (!boardId) {
+        res.status(404).json({ error: "Board for task not found" });
+        return;
+      }
+
+      if (!(await requireViewer(boardId, req.user!.id, res))) return;
+
+      res.json({ task });
+    } catch (error) {
+      console.error("Get single task error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 router.post(
   "/columns/:columnId/tasks",

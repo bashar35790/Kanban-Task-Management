@@ -450,6 +450,34 @@ router.delete(
   }
 );
 
+// GET /api/v1/boards/:boardId/columns - read columns for a board (VIEWER+)
+router.get(
+  "/:boardId/columns",
+  authenticate,
+  param("boardId").isUUID().withMessage("Invalid boardId"),
+  requireBoardAccess("VIEWER"),
+  async (req, res) => {
+    if (sendValidationErrors(req, res)) return;
+
+    try {
+      const columns = await prisma.column.findMany({
+        where: { boardId: p(req.params.boardId) },
+        orderBy: { position: "asc" },
+        include: {
+          tasks: {
+            orderBy: { position: "asc" },
+          },
+        },
+      });
+
+      res.json({ columns });
+    } catch (error) {
+      console.error("Get columns error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
 router.post(
   "/:boardId/columns",
   authenticate,

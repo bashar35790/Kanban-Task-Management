@@ -13,6 +13,7 @@ import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
 import { AddColumnForm } from "./AddColumnForm";
+import { EditTaskModal } from "./EditTaskModal";
 import type { Column, Task } from "@/hooks/useBoard";
 
 type KanbanBoardProps = {
@@ -26,8 +27,10 @@ type KanbanBoardProps = {
   }) => void;
   onAddColumn: (title: string) => void;
   onDeleteColumn: (columnId: string) => void;
+  onUpdateColumn?: (columnId: string, title: string) => void;
   onAddTask: (columnId: string, title: string, category: string, assignee: string) => void;
   onDeleteTask: (task: Task) => void;
+  onUpdateTask?: (taskId: string, data: any) => Promise<void>;
 };
 
 export function KanbanBoard({
@@ -36,10 +39,13 @@ export function KanbanBoard({
   onMoveTask,
   onAddColumn,
   onDeleteColumn,
+  onUpdateColumn,
   onAddTask,
   onDeleteTask,
+  onUpdateTask,
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
@@ -118,10 +124,12 @@ export function KanbanBoard({
             column={column}
             canEdit={canEdit}
             onDeleteColumn={() => onDeleteColumn(column.id)}
+            onUpdateColumnTitle={(title) => onUpdateColumn?.(column.id, title)}
             onAddTask={(title, category, assignee) =>
               onAddTask(column.id, title, category, assignee)
             }
             onDeleteTask={onDeleteTask}
+            onEditTask={(task) => setEditingTask(task)}
           />
         ))}
         {canEdit ? <AddColumnForm onSubmit={onAddColumn} /> : null}
@@ -134,6 +142,19 @@ export function KanbanBoard({
           </div>
         ) : null}
       </DragOverlay>
+
+      {canEdit && (
+        <EditTaskModal
+          open={Boolean(editingTask)}
+          onClose={() => setEditingTask(null)}
+          task={editingTask}
+          onSave={async (taskId, data) => {
+            if (onUpdateTask) {
+              await onUpdateTask(taskId, data);
+            }
+          }}
+        />
+      )}
     </DndContext>
   );
 }

@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/Avatar";
 type KanbanTaskProps = {
   task: Task;
   onDelete?: () => void;
+  onEdit?: () => void;
 };
 
 function getTagStyle(category: string) {
@@ -21,7 +22,7 @@ function getTagStyle(category: string) {
   return "bg-blue-50 text-blue-500 border border-blue-100";
 }
 
-export function KanbanTask({ task, onDelete }: KanbanTaskProps) {
+export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
   const {
     attributes,
     listeners,
@@ -42,11 +43,16 @@ export function KanbanTask({ task, onDelete }: KanbanTaskProps) {
       style={style}
       {...attributes}
       {...listeners}
+      onClick={(e) => {
+        if (onEdit && (e.target as HTMLElement).tagName !== "BUTTON" && !(e.target as HTMLElement).closest("button")) {
+          onEdit();
+        }
+      }}
       className={`group relative flex flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-xs transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md cursor-grab active:cursor-grabbing select-none ${
         isDragging ? "z-20 opacity-40 ring-2 ring-indigo-400" : ""
       }`}
     >
-      {/* Top row: Category Pill + 3 dots menu */}
+      {/* Top row: Category Pill + action buttons */}
       <div className="flex items-center justify-between gap-2 mb-2.5">
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${getTagStyle(
@@ -56,22 +62,39 @@ export function KanbanTask({ task, onDelete }: KanbanTaskProps) {
           {task.category || "UI Design"}
         </span>
 
-        {onDelete ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            title="Delete task"
-            className="text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-          >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-        ) : (
-          <span className="text-slate-300 text-xs leading-none">•••</span>
-        )}
+        <div className="flex items-center gap-0.5">
+          {onEdit ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              title="Edit task"
+              className="text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
+          ) : null}
+
+          {onDelete ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              title="Delete task"
+              className="text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          ) : (
+            <span className="text-slate-300 text-xs leading-none">•••</span>
+          )}
+        </div>
       </div>
 
       {/* Task Title */}

@@ -4,18 +4,22 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { Board } from "@/hooks/useBoards";
 import { useToggleFavoriteBoard } from "@/hooks/useBoards";
+import { useAuth } from "@/hooks/useAuth";
 import { EditBoardModal } from "./EditBoardModal";
 import { DeleteBoardModal } from "./DeleteBoardModal";
+import { ShareBoardModal } from "./ShareBoardModal";
 
 type BoardCardProps = {
   board: Board;
 };
 
 export function BoardCard({ board }: BoardCardProps) {
+  const { user } = useAuth();
   const toggleFavorite = useToggleFavoriteBoard();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,20 +117,36 @@ export function BoardCard({ board }: BoardCardProps) {
                         </button>
                       )}
                       {isOwner && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setMenuOpen(false);
-                            setDeleteOpen(true);
-                          }}
-                          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer text-left"
-                        >
-                          <svg className="h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Delete Board
-                        </button>
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setMenuOpen(false);
+                              setShareOpen(true);
+                            }}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer text-left"
+                          >
+                            <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            Share Board
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setMenuOpen(false);
+                              setDeleteOpen(true);
+                            }}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer text-left"
+                          >
+                            <svg className="h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Board
+                          </button>
+                        </>
                       )}
                     </div>
                   )}
@@ -187,6 +207,15 @@ export function BoardCard({ board }: BoardCardProps) {
         onClose={() => setDeleteOpen(false)}
         board={{ id: board.id, title: board.title }}
       />
+
+      {isOwner && (
+        <ShareBoardModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          boardId={board.id}
+          currentUserId={user?.id ?? ""}
+        />
+      )}
     </>
   );
 }
