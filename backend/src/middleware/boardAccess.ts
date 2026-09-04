@@ -23,6 +23,27 @@ export function requireBoardAccess(minRole: Role) {
         return;
       }
 
+      // First check if user is the owner defined in the board schema
+      const board = await prisma.board.findUnique({
+        where: { id: boardId },
+        select: { ownerId: true },
+      });
+
+      if (!board) {
+        res.status(404).json({ error: "Board not found" });
+        return;
+      }
+
+      if (board.ownerId === req.user.id) {
+        req.boardMember = {
+          boardId,
+          userId: req.user.id,
+          role: "OWNER",
+        };
+        next();
+        return;
+      }
+
       const member = await prisma.boardMember.findUnique({
         where: {
           boardId_userId: {

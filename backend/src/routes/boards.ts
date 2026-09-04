@@ -45,10 +45,26 @@ router.post(
           },
         });
 
+        await tx.boardActivity.create({
+          data: {
+            boardId: newBoard.id,
+            userName: req.user!.name || "User",
+            action: "created this board",
+            iconColor: "blue",
+          },
+        });
+
         return newBoard;
       });
 
-      res.status(201).json({ board });
+      res.status(201).json({
+        board: {
+          ...board,
+          role: "OWNER",
+          memberCount: 1,
+          taskCount: 0,
+        },
+      });
     } catch (error) {
       console.error("Create board error:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -59,22 +75,27 @@ router.post(
 // GET /api/v1/boards — list all boards the user owns or is a member of
 router.get("/", authenticate, async (req, res) => {
   try {
-    const memberships = await prisma.boardMember.findMany({
-      where: { userId: req.user!.id },
+    const rawBoards = await prisma.board.findMany({
+      where: {
+        OR: [
+          { ownerId: req.user!.id },
+          { members: { some: { userId: req.user!.id } } },
+        ],
+      },
       include: {
-        board: {
-          include: {
+        members: {
+          where: { userId: req.user!.id },
+          select: { role: true },
+        },
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+        columns: {
+          select: {
             _count: {
-              select: {
-                members: true,
-              },
-            },
-            columns: {
-              select: {
-                _count: {
-                  select: { tasks: true },
-                },
-              },
+              select: { tasks: true },
             },
           },
         },
@@ -82,19 +103,31 @@ router.get("/", authenticate, async (req, res) => {
       orderBy: { createdAt: "asc" },
     });
 
-    const boards = memberships.map((m) => {
-      const taskCount = m.board.columns.reduce(
-        (sum, col) => sum + col._count.tasks,
-        0
-      );
-      const { columns, _count, ...boardData } = m.board;
-      return {
-        ...boardData,
-        role: m.role,
-        memberCount: _count.members,
-        taskCount,
-      };
-    });
+    const boards = await Promise.all(
+      rawBoards.map(async (b) => {
+        const taskCount = b.columns.reduce(
+          (sum, col) => sum + col._count.tasks,
+          0
+        );
+
+        const ownerUser = await prisma.user.findUnique({
+          where: { id: b.ownerId },
+          select: { id: true, name: true, email: true, image: true },
+        });
+
+        const isOwner = b.ownerId === req.user!.id;
+        const role = isOwner ? "OWNER" : (b.members[0]?.role || "VIEWER");
+
+        const { columns, _count, members, ...boardData } = b;
+        return {
+          ...boardData,
+          role,
+          memberCount: _count.members,
+          taskCount,
+          owner: ownerUser,
+        };
+      })
+    );
 
     res.json({ boards });
   } catch (error) {
@@ -144,6 +177,11 @@ router.get(
         return;
       }
 
+      const ownerUser = await prisma.user.findUnique({
+        where: { id: board.ownerId },
+        select: { id: true, name: true, email: true, image: true },
+      });
+
       const enrichedMembers = await Promise.all(
         board.members.map(async (m) => {
           const user = await prisma.user.findUnique({
@@ -155,7 +193,7 @@ router.get(
       );
 
       res.json({
-        board: { ...board, members: enrichedMembers },
+        board: { ...board, owner: ownerUser, members: enrichedMembers },
         yourRole: req.boardMember?.role,
       });
     } catch (error) {
@@ -198,13 +236,18 @@ router.patch(
   "/:boardId",
   authenticate,
   param("boardId").isUUID().withMessage("Invalid boardId"),
-  body("title").optional().notEmpty().trim(),
+  body("title").optional().notEmpty().trim().withMessage("Title cannot be empty"),
   body("description").optional().trim(),
   requireBoardAccess("EDITOR"),
   async (req, res) => {
     if (sendValidationErrors(req, res)) return;
 
     try {
+      const existing = await prisma.board.findUnique({
+        where: { id: p(req.params.boardId) },
+        select: { title: true },
+      });
+
       const board = await prisma.board.update({
         where: { id: p(req.params.boardId) },
         data: {
@@ -212,6 +255,17 @@ router.patch(
           ...(req.body.description !== undefined && { description: req.body.description }),
         },
       });
+
+      if (req.body.title && req.body.title !== existing?.title) {
+        await prisma.boardActivity.create({
+          data: {
+            boardId: board.id,
+            userName: req.user!.name || "User",
+            action: `renamed board to "${board.title}"`,
+            iconColor: "purple",
+          },
+        }).catch((err) => console.error("Board activity error:", err));
+      }
 
       res.json({ board });
     } catch (error) {

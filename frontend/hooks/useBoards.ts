@@ -16,6 +16,12 @@ export type Board = {
   role: BoardRole;
   memberCount?: number;
   taskCount?: number;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string | null;
+  };
 };
 
 export function useBoards() {
@@ -45,6 +51,48 @@ export function useCreateBoard() {
   });
 }
 
+export function useUpdateBoard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      boardId,
+      ...input
+    }: {
+      boardId: string;
+      title?: string;
+      description?: string | null;
+    }) => {
+      const data = await apiFetch<{ board: Board }>(`/boards/${boardId}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      });
+      return data.board;
+    },
+    onSuccess: (updatedBoard) => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["board", updatedBoard.id] });
+    },
+  });
+}
+
+export function useDeleteBoard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (boardId: string) => {
+      await apiFetch(`/boards/${boardId}`, {
+        method: "DELETE",
+      });
+      return boardId;
+    },
+    onSuccess: (boardId) => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.removeQueries({ queryKey: ["board", boardId] });
+    },
+  });
+}
+
 export function useToggleFavoriteBoard() {
   const queryClient = useQueryClient();
 
@@ -60,3 +108,4 @@ export function useToggleFavoriteBoard() {
     },
   });
 }
+

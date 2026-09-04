@@ -94,6 +94,8 @@ model Board {
   columns     Column[]
   members     BoardMember[]
   activities  BoardActivity[]
+
+  @@index([ownerId])
 }
 
 model BoardMember {

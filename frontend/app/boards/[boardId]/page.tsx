@@ -15,6 +15,8 @@ import {
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { SidebarWidgets } from "@/components/kanban/SidebarWidgets";
 import { ShareBoardModal } from "@/components/boards/ShareBoardModal";
+import { EditBoardModal } from "@/components/boards/EditBoardModal";
+import { DeleteBoardModal } from "@/components/boards/DeleteBoardModal";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Avatar } from "@/components/ui/Avatar";
@@ -27,6 +29,8 @@ export default function BoardPage() {
   const { data, isPending, isError, error } = useBoard(boardId);
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [searchTaskQuery, setSearchTaskQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"position" | "title" | "date">(
@@ -195,9 +199,53 @@ export default function BoardPage() {
           <main className="flex flex-1 flex-col overflow-hidden p-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                  {board?.title || "Homepage Design"}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                    {board?.title || "Homepage Design"}
+                  </h1>
+                  {canEdit && board ? (
+                    <button
+                      onClick={() => setEditOpen(true)}
+                      title="Rename / Edit Board"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-indigo-600 transition-colors cursor-pointer"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  ) : null}
+                  {isOwner && board ? (
+                    <button
+                      onClick={() => setDeleteOpen(true)}
+                      title="Delete Board"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  ) : null}
+                </div>
                 {board?.description ? (
                   <p className="text-xs text-slate-400 mt-0.5">
                     {board.description}
@@ -320,6 +368,27 @@ export default function BoardPage() {
         boardId={boardId}
         currentUserId={user?.id ?? ""}
       />
+
+      {board ? (
+        <>
+          <EditBoardModal
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            board={{
+              id: board.id,
+              title: board.title,
+              description: board.description,
+            }}
+          />
+
+          <DeleteBoardModal
+            open={deleteOpen}
+            onClose={() => setDeleteOpen(false)}
+            board={{ id: board.id, title: board.title }}
+            onDeleted={() => router.push("/boards")}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
