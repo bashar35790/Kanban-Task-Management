@@ -127,6 +127,59 @@ Open <http://localhost:3000>, register, and create your first board.
 
 ---
 
+## Deploy with Supabase (Postgres)
+
+Local Docker Postgres stays the default for development. Production uses Supabase.
+
+Supabase project: `https://yjtvearithnkebhpnyvs.supabase.co` (region `aws-0-ap-northeast-2`).
+Two different connection strings are required:
+
+| Variable | Which pooler | Value template |
+|---|---|---|
+| `DATABASE_URL` | Transaction mode (IPv4, port `6543`) — used by the running API | `postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require` |
+| `DIRECT_URL` | Session mode (port `5432`) — used by `prisma migrate deploy` | `postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require` |
+
+Replace `[YOUR-PASSWORD]` with the Supabase database password (URL-encode it if it
+contains `@ / : ? # & =`). Never commit the real password — set it in your host's
+env-var UI (Render / Railway / etc.) and in your local `backend/.env` (gitignored).
+`backend/.env.example` already contains these templates.
+
+Backend env vars for production (e.g. Render):
+
+```bash
+DATABASE_URL="postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require"
+DIRECT_URL="postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require"
+BETTER_AUTH_SECRET="<random-32-char-secret>"
+BETTER_AUTH_URL="https://your-app-name.onrender.com"
+FRONTEND_URL="https://your-app.vercel.app"
+NODE_ENV=production
+PORT=5000
+```
+
+Deploy steps:
+
+```bash
+# 1. Apply migrations to Supabase (uses DIRECT_URL, the session pooler)
+npx prisma migrate deploy
+
+# 2. Optional demo data
+npx prisma db seed
+
+# 3. Start the API (Dockerfile CMD already does migrate + start)
+npm run build && node dist/index.js
+```
+
+Notes:
+
+- The runtime (`src/lib/prisma.ts`) connects through `DATABASE_URL` with SSL enabled
+  automatically for `*.supabase.com` hosts. The adapter does not cache prepared
+  statements, so it is safe behind the transaction-mode pooler.
+- `prisma.config.ts` points migrations at `DIRECT_URL` — never run migrations against
+  the `:6543` transaction pooler.
+- Frontend production: set `NEXT_PUBLIC_API_URL` to the deployed backend origin.
+
+---
+
 ## Authorization Model
 
 | Role | Read board | Add/edit/delete columns & tasks | Manage members |
