@@ -10,7 +10,29 @@ import tasksRouter from "./routes/tasks.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+app.set("trust proxy", true);
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "https://abulbashar-kanban-task-management.vercel.app",
+  "http://localhost:3000",
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    credentials: true,
+  })
+);
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
