@@ -29,6 +29,9 @@ app.use((_req, res) => {
   res.status(404).json({ error: "Not found" }); 
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Backend listening on ${process.env.PORT || 5000}`);
+const PORT = Number(process.env.PORT) || 5000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend listening on 0.0.0.0:${PORT}`);
 });
+
