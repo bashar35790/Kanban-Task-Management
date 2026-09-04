@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { body, param, validationResult } from "express-validator";
-import { authenticate } from "../middleware/authenticate";
-import { prisma } from "../lib/prisma";
+import { authenticate } from "../middleware/authenticate.js";
+import { prisma } from "../lib/prisma.js";
 import {
   computePosition,
   needsRebalance,
   rebalancePositions,
-} from "../utils/fractional";
+} from "../utils/fractional.js";
 
 const router = Router();
 

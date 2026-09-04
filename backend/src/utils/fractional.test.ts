@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert";
-import { computePosition, needsRebalance, rebalancePositions } from "./fractional";
+import { computePosition, needsRebalance, rebalancePositions } from "./fractional.js";
 
 test("computePosition", async (t) => {
   await t.test("both null", () => {

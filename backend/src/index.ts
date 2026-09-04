@@ -2,11 +2,11 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth";
-import usersRouter from "./routes/users";
-import boardsRouter from "./routes/boards";
-import columnsRouter from "./routes/columns";
-import tasksRouter from "./routes/tasks";
+import { auth } from "./lib/auth.js";
+import usersRouter from "./routes/users.js";
+import boardsRouter from "./routes/boards.js";
+import columnsRouter from "./routes/columns.js";
+import tasksRouter from "./routes/tasks.js";
 
 const app = express();
 

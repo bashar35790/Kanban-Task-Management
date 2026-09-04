@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { body, param, validationResult } from "express-validator";
-import { authenticate } from "../middleware/authenticate";
-import { requireBoardAccess } from "../middleware/boardAccess";
-import { prisma } from "../lib/prisma";
-import { computePosition } from "../utils/fractional";
+import { authenticate } from "../middleware/authenticate.js";
+import { requireBoardAccess } from "../middleware/boardAccess.js";
+import { prisma } from "../lib/prisma.js";
+import { computePosition } from "../utils/fractional.js";
 
 const router = Router();
 

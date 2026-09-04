@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert";
-import { requireBoardAccess } from "./boardAccess";
-import { prisma } from "../lib/prisma";
+import { requireBoardAccess } from "./boardAccess.js";
+import { prisma } from "../lib/prisma.js";
 
 test("requireBoardAccess middleware", async (t) => {
   await t.test("returns 401 when req.user is undefined", async () => {

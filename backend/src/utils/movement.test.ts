@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert";
-import { computePosition, needsRebalance, rebalancePositions } from "./fractional";
+import { computePosition, needsRebalance, rebalancePositions } from "./fractional.js";
 
 test("Task Movement & Ordering Edge Cases", async (t) => {
   await t.test("moving to an empty column (both null) returns base index 1000", () => {
