@@ -2,6 +2,7 @@
   "name": "kanban-backend",
   "version": "1.0.0",
   "private": true,
+  "type": "commonjs",
   "description": "Express API backend for the Mini Kanban Board",
   "scripts": {
     "dev": "tsx watch src/index.ts",
