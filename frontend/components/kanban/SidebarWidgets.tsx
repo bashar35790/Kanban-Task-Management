@@ -5,9 +5,16 @@ import type { Task, BoardActivity } from "@/hooks/useBoard";
 type SidebarWidgetsProps = {
   tasks: Task[];
   activities: BoardActivity[];
+  isDrawer?: boolean;
+  onClose?: () => void;
 };
 
-export function SidebarWidgets({ tasks, activities }: SidebarWidgetsProps) {
+export function SidebarWidgets({
+  tasks,
+  activities,
+  isDrawer = false,
+  onClose,
+}: SidebarWidgetsProps) {
   // Compute progress for each category
   const copywritingTasks = tasks.filter((t) =>
     (t.category || "").toLowerCase().includes("copy")
@@ -60,7 +67,27 @@ export function SidebarWidgets({ tasks, activities }: SidebarWidgetsProps) {
   };
 
   return (
-    <aside className="w-72 shrink-0 border-l border-slate-100/80 bg-white/40 p-6 flex flex-col gap-8 select-none">
+    <aside
+      className={
+        isDrawer
+          ? "w-full max-w-sm bg-white p-6 flex flex-col gap-6 overflow-y-auto h-full shadow-2xl"
+          : "hidden xl:flex w-72 shrink-0 border-l border-slate-100/80 bg-white/40 p-6 flex-col gap-8 select-none overflow-y-auto"
+      }
+    >
+      {isDrawer && (
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h2 className="text-base font-black text-slate-900">
+            Insights & Activity
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close insights"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 text-xs transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       {/* Task Progress Section */}
       <div>
         <h3 className="text-sm font-bold text-slate-800 tracking-tight mb-5">

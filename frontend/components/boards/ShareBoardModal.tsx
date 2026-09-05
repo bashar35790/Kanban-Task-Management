@@ -59,8 +59,8 @@ export function ShareBoardModal({
           disabled={invite.isPending}
         />
 
-        <div className="flex items-end gap-3">
-          <div className="flex flex-col gap-1.5 flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <span className="text-xs font-bold tracking-wide text-slate-700">
               Role
             </span>
@@ -70,7 +70,7 @@ export function ShareBoardModal({
                   key={role}
                   type="button"
                   onClick={() => setSelectedRole(role)}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  className={`min-w-0 flex-1 truncate px-2 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                     selectedRole === role
                       ? "bg-white text-indigo-600 shadow-xs"
                       : "text-slate-500 hover:text-slate-800"
@@ -84,7 +84,7 @@ export function ShareBoardModal({
           <Button
             type="submit"
             loading={invite.isPending}
-            className="h-11 px-6 text-xs font-bold rounded-2xl"
+            className="h-11 w-full px-6 text-xs font-bold rounded-2xl sm:w-auto"
           >
             Invite
           </Button>
@@ -145,7 +145,7 @@ function MemberRow({
   const email = member.user?.email ?? "";
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3">
+    <li className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
       <div className="flex min-w-0 items-center gap-3">
         <Avatar name={name} size="sm" />
         <div className="min-w-0">
@@ -161,7 +161,7 @@ function MemberRow({
           value={member.role}
           onChange={(e) => onChangeRole(e.target.value as BoardRole)}
           disabled={removing || isSelf}
-          className="h-8 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 focus:outline-none disabled:opacity-60 cursor-pointer shadow-2xs"
+          className="h-9 min-h-[36px] flex-1 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 focus:outline-none disabled:opacity-60 cursor-pointer shadow-2xs min-[420px]:flex-none"
         >
           {roles.map((role) => (
             <option key={role} value={role}>

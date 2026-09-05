@@ -162,8 +162,8 @@ export function BoardCard({ board }: BoardCardProps) {
           </Link>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
-          <div className="flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             {/* Role / Owner Badge */}
             <span
               className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold ${

@@ -64,17 +64,17 @@ export default function BoardsPage() {
   const firstName = user?.name?.split(" ")[0] || "there";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-3 sm:p-6 lg:p-8">
+    <div className="flex min-h-screen min-h-dvh flex-col items-center justify-center p-2 sm:p-6 lg:p-8">
       {/* Container matching Image 1: large soft rounded card with glass/frost styling */}
-      <div className="relative flex min-h-[90vh] w-full max-w-[1400px] flex-col rounded-[2rem] border border-white/80 bg-white/80 shadow-2xl shadow-purple-950/5 backdrop-blur-xl overflow-hidden">
+      <div className="relative flex min-h-[calc(100dvh-1rem)] w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-2xl shadow-purple-950/5 backdrop-blur-xl sm:min-h-[90vh] sm:rounded-[2rem]">
         {/* Top Navigation Bar matching Image 1 */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-100 px-8 select-none shrink-0">
+        <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-slate-100 px-4 py-2 select-none sm:px-6 lg:px-8">
           {/* Brand pill + Search bar */}
-          <div className="flex items-center gap-6">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none sm:gap-6">
             {/* TASK Logo Pill */}
             <Link
               href="/boards"
-              className="flex items-center gap-2 group cursor-pointer"
+              className="flex shrink-0 items-center gap-2 group cursor-pointer"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-pink-500 font-black text-xs text-white shadow-sm shadow-pink-200">
                 T
@@ -85,7 +85,7 @@ export default function BoardsPage() {
             </Link>
 
             {/* "Search everything" input pill matching Image 1 */}
-            <div className="relative w-64">
+            <div className="relative hidden w-48 sm:block lg:w-64">
               <input
                 type="text"
                 placeholder="Search boards..."
@@ -125,9 +125,9 @@ export default function BoardsPage() {
             </span>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             {/* Notification bell with red badge matching Image 1 */}
-            <button className="relative text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+            <button aria-label="Notifications" className="relative text-slate-400 hover:text-slate-600 p-1.5 cursor-pointer">
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -141,36 +141,60 @@ export default function BoardsPage() {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
               </svg>
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
             </button>
 
             <button
               onClick={handleSignOut}
-              className="text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="hidden text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer min-[400px]:inline"
             >
               Sign out
             </button>
 
             <Avatar name={user?.name || user?.email || "User"} size="sm" />
           </div>
+
+          {/* Mobile search row — full width below header */}
+          <div className="relative w-full pb-1 sm:hidden">
+            <input
+              type="text"
+              placeholder="Search boards..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full rounded-full border-none bg-slate-100/70 pl-9 pr-3 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
         </header>
 
         {/* Dashboard Body */}
-        <main className="flex-1 p-8 sm:p-10 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 xl:p-10">
           {/* Welcome Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-xl font-black tracking-tight break-words text-slate-900 sm:text-2xl">
                 Good everything, {firstName}
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="mt-1 text-xs text-slate-400">
                 Manage your projects and keep your team moving.
               </p>
             </div>
 
             <Button
               onClick={() => setCreateOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm px-4 py-2 font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm px-4 py-2 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer sm:w-auto"
             >
               <svg
                 className="h-4 w-4"
@@ -190,10 +214,10 @@ export default function BoardsPage() {
           </div>
 
           {/* Quick Filter Tabs */}
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-4 mb-6 select-none overflow-x-auto">
+          <div className="no-scrollbar -mx-4 mb-6 flex items-center gap-2 overflow-x-auto border-b border-slate-100 px-4 pb-4 select-none sm:mx-0 sm:px-0">
             <button
               onClick={() => setActiveTab("all")}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "all"
                   ? "bg-pink-500 text-white shadow-xs shadow-pink-200"
                   : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -203,7 +227,7 @@ export default function BoardsPage() {
             </button>
             <button
               onClick={() => setActiveTab("my-boards")}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "my-boards"
                   ? "bg-pink-500 text-white shadow-xs shadow-pink-200"
                   : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -213,7 +237,7 @@ export default function BoardsPage() {
             </button>
             <button
               onClick={() => setActiveTab("shared")}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === "shared"
                   ? "bg-pink-500 text-white shadow-xs shadow-pink-200"
                   : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"
@@ -223,7 +247,7 @@ export default function BoardsPage() {
             </button>
             <button
               onClick={() => setActiveTab("favorites")}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "favorites"
                   ? "bg-pink-500 text-white shadow-xs shadow-pink-200"
                   : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80"

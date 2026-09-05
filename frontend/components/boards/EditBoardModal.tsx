@@ -73,11 +73,11 @@ export function EditBoardModal({ open, onClose, board }: EditBoardModalProps) {
           </p>
         ) : null}
 
-        <div className="mt-2 flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="mt-2 flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+          <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" loading={updateBoard.isPending}>
+          <Button type="submit" loading={updateBoard.isPending} className="w-full sm:w-auto">
             Save Changes
           </Button>
         </div>

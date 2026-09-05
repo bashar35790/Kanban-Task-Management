@@ -72,12 +72,13 @@ export function DeleteBoardModal({
           </p>
         ) : null}
 
-        <div className="mt-2 flex items-center justify-end gap-3 pt-2">
+        <div className="mt-2 flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
           <Button
             type="button"
             variant="secondary"
             onClick={onClose}
             disabled={deleteBoard.isPending}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
@@ -86,6 +87,7 @@ export function DeleteBoardModal({
             variant="danger"
             onClick={handleDelete}
             loading={deleteBoard.isPending}
+            className="w-full sm:w-auto"
           >
             Delete Board
           </Button>

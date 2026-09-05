@@ -4,7 +4,8 @@ import { useState } from "react";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -46,9 +47,13 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
-  );
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: { distance: 5 },
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 250, tolerance: 5 },
+  });
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   const allTasks = columns.flatMap((c) => c.tasks);
 
@@ -117,7 +122,7 @@ export function KanbanBoard({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex gap-4 overflow-x-auto pb-6 pt-1 items-start">
+      <div className="kanban-scroll kanban-snap flex items-start gap-3 overflow-x-auto pb-4 pt-1 sm:gap-4 sm:pb-6">
         {columns.map((column) => (
           <KanbanColumn
             key={column.id}
@@ -137,7 +142,7 @@ export function KanbanBoard({
 
       <DragOverlay>
         {activeTask ? (
-          <div className="w-68 rotate-2 scale-105 pointer-events-none shadow-2xl">
+          <div className="pointer-events-none w-[78vw] max-w-[17rem] rotate-2 scale-105 shadow-2xl sm:w-72 sm:max-w-none">
             <KanbanTask task={activeTask} />
           </div>
         ) : null}

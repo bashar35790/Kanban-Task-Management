@@ -43,7 +43,7 @@ export function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col rounded-3xl p-2 transition-all duration-200 ${
+      className={`flex w-[78vw] max-w-[18rem] shrink-0 snap-start flex-col rounded-2xl p-2 transition-all duration-200 sm:w-72 sm:max-w-none sm:rounded-3xl ${
         isOver ? "bg-indigo-50/40 ring-2 ring-indigo-300" : "bg-transparent"
       }`}
     >
@@ -114,7 +114,7 @@ export function KanbanColumn({
         items={column.tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex flex-col gap-3 min-h-[100px]">
+        <div className="flex max-h-[52dvh] flex-col gap-2.5 overflow-y-auto overscroll-contain px-0.5 pb-1 pt-0.5 sm:gap-3 lg:max-h-[calc(100dvh-24rem)]">
           {column.tasks.map((task) => (
             <KanbanTask
               key={task.id}

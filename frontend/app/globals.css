@@ -32,15 +32,68 @@
 
 html {
   color-scheme: light;
+  /* Prevent horizontal page scroll caused by wide kanban rows */
+  overflow-x: clip;
 }
 
 body {
   background: radial-gradient(circle at 10% 20%, rgba(254, 215, 226, 0.45) 0%, rgba(243, 232, 255, 0.45) 35%, rgba(254, 243, 199, 0.35) 75%, rgba(240, 249, 255, 0.5) 100%),
               #f8f8fd;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--color-text-main);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
+  text-size-adjust: 100%;
+}
+
+/* Media should never overflow narrow viewports */
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+/* Smooth momentum scrolling on iOS for horizontal lanes */
+.kanban-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .kanban-scroll {
+    scroll-padding-inline: 0;
+  }
+}
+
+/* Snap helper applied from components for mobile column paging */
+@media (max-width: 639px) {
+  .kanban-snap {
+    scroll-snap-type: x mandatory;
+  }
+  .kanban-snap > * {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+/* Allow vertical page scroll to win over drag gestures on touch.
+   dnd-kit TouchSensor still activates after long-press delay. */
+.kanban-scroll,
+.kanban-scroll * {
+  touch-action: pan-x pan-y;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Custom smooth scrollbar */
@@ -57,4 +110,13 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(160, 165, 185, 0.5);
+}
+
+/* Utility to hide scrollbars while allowing smooth scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

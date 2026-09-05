@@ -28,14 +28,14 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-3 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-lg rounded-[2rem] border border-white/80 bg-white/95 p-7 sm:p-8 shadow-2xl shadow-purple-950/10 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-black tracking-tight text-slate-900">{title}</h2>
+      <div className="w-full max-w-lg rounded-3xl sm:rounded-[2rem] border border-white/80 bg-white/95 p-5 sm:p-8 shadow-2xl shadow-purple-950/10 backdrop-blur-2xl max-h-[90dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="mb-4 sm:mb-6 flex items-center justify-between shrink-0">
+          <h2 className="text-lg sm:text-xl font-black tracking-tight text-slate-900">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -44,7 +44,9 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             ✕
           </button>
         </div>
-        {children}
+        <div className="flex-1 overflow-y-auto pr-0.5">
+          {children}
+        </div>
       </div>
     </div>
   );

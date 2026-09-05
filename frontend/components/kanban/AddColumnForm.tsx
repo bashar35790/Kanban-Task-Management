@@ -15,7 +15,7 @@ export function AddColumnForm({ onSubmit }: AddColumnFormProps) {
     return (
       <button
         onClick={() => setActive(true)}
-        className="flex h-12 w-72 shrink-0 items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300/80 bg-white/40 text-xs font-bold text-slate-500 transition-all hover:border-indigo-400 hover:text-indigo-600 hover:bg-white cursor-pointer"
+        className="flex h-12 w-[78vw] max-w-[18rem] shrink-0 snap-start items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300/80 bg-white/40 text-xs font-bold text-slate-500 transition-all hover:border-indigo-400 hover:text-indigo-600 hover:bg-white cursor-pointer sm:w-72 sm:max-w-none"
       >
         <span className="text-base leading-none">+</span> Add column
       </button>
@@ -33,7 +33,7 @@ export function AddColumnForm({ onSubmit }: AddColumnFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-72 shrink-0 flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
+      className="flex w-[78vw] max-w-[18rem] shrink-0 snap-start flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm sm:w-72 sm:max-w-none"
     >
       <input
         type="text"

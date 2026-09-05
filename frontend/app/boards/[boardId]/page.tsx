@@ -38,6 +38,7 @@ export default function BoardPage() {
   const [sortBy, setSortBy] = useState<"position" | "title" | "date">(
     "position",
   );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const moveTask = useMoveTask(boardId);
   const addColumn = useAddColumn(boardId);
@@ -109,13 +110,13 @@ export default function BoardPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-3 sm:p-6 lg:p-8">
-      <div className="relative flex min-h-[90vh] w-full max-w-[1400px] flex-col rounded-[2rem] border border-white/80 bg-white/80 shadow-2xl shadow-purple-950/5 backdrop-blur-xl overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b border-slate-100 px-8 select-none">
-          <div className="flex items-center gap-6">
+    <div className="flex min-h-screen min-h-dvh flex-col items-center justify-center p-2 sm:p-6 lg:p-8">
+      <div className="relative flex min-h-[calc(100dvh-1rem)] w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-2xl shadow-purple-950/5 backdrop-blur-xl sm:min-h-[90vh] sm:rounded-[2rem]">
+        <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-slate-100 px-4 py-2 select-none sm:px-6 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none sm:gap-6">
             <Link
               href="/boards"
-              className="flex items-center gap-2 group cursor-pointer"
+              className="flex shrink-0 items-center gap-2 group cursor-pointer"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-pink-500 font-black text-xs text-white shadow-sm shadow-pink-200">
                 T
@@ -125,7 +126,7 @@ export default function BoardPage() {
               </span>
             </Link>
 
-            <div className="relative w-64">
+            <div className="relative hidden w-48 sm:block lg:w-64">
               <input
                 type="text"
                 placeholder="Search everything"
@@ -166,8 +167,18 @@ export default function BoardPage() {
           </nav>
 
           {/* Right: Notifications, Sign out, User avatar */}
-          <div className="flex items-center gap-4">
-            <button className="relative text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            {/* Insights toggle for < xl screens */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open insights and activity"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100/80 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 cursor-pointer xl:hidden"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </button>
+            <button aria-label="Notifications" className="relative text-slate-400 hover:text-slate-600 p-1.5 cursor-pointer">
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -181,7 +192,7 @@ export default function BoardPage() {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
               </svg>
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
             </button>
 
             <button
@@ -189,29 +200,54 @@ export default function BoardPage() {
                 await signOut();
                 router.push("/login");
               }}
-              className="text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="hidden text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer min-[400px]:inline"
             >
               Sign out
             </button>
 
             <Avatar name={user?.name || user?.email || "User"} size="sm" />
           </div>
+
+          {/* Mobile search row */}
+          <div className="relative w-full pb-1 sm:hidden">
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchTaskQuery}
+              onChange={(e) => setSearchTaskQuery(e.target.value)}
+              className="h-9 w-full rounded-full border-none bg-slate-100/70 pl-9 pr-3 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-pink-200 focus:outline-none transition-all"
+            />
+            <svg
+              className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
         </header>
 
         {/* 2. Main Work Area: Board Columns (Left/Center) + Sidebar Widgets (Right) */}
-        <div className="flex flex-1 overflow-hidden">
-          <main className="flex flex-1 flex-col overflow-hidden p-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-4 sm:p-6 lg:p-8">
+            <div className="mb-5 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
+                  <h1 className="min-w-0 flex-1 truncate text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
                     {board?.title || "Homepage Design"}
                   </h1>
                   {canEdit && board ? (
                     <button
                       onClick={() => setEditOpen(true)}
                       title="Rename / Edit Board"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-indigo-600 transition-colors cursor-pointer"
+                      aria-label="Rename board"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-indigo-600 transition-colors cursor-pointer"
                     >
                       <svg
                         className="h-4 w-4"
@@ -232,7 +268,8 @@ export default function BoardPage() {
                     <button
                       onClick={() => setDeleteOpen(true)}
                       title="Delete Board"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+                      aria-label="Delete board"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
                     >
                       <svg
                         className="h-4 w-4"
@@ -251,21 +288,21 @@ export default function BoardPage() {
                   ) : null}
                 </div>
                 {board?.description ? (
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="mt-0.5 line-clamp-2 text-xs break-words text-slate-400">
                     {board.description}
                   </p>
                 ) : null}
               </div>
 
               {/* Members Avatar Stack + Add (+) matching Image 1 & 3 */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 shadow-xs">
-                    <span>Filter:</span>
+              <div className="flex flex-col gap-3 min-[480px]:flex-row min-[480px]:flex-wrap min-[480px]:items-center lg:justify-end">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 shadow-xs">
+                    <span className="shrink-0">Filter:</span>
                     <select
                       value={filterCategory}
                       onChange={(e) => setFilterCategory(e.target.value)}
-                      className="bg-transparent focus:outline-none cursor-pointer"
+                      className="min-w-0 max-w-[7rem] truncate bg-transparent focus:outline-none cursor-pointer sm:max-w-none"
                     >
                       <option value="ALL">All Categories</option>
                       <option value="UI Design">UI Design</option>
@@ -274,12 +311,12 @@ export default function BoardPage() {
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 shadow-xs">
-                    <span>Sort:</span>
+                  <div className="flex min-w-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 shadow-xs">
+                    <span className="shrink-0">Sort:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="bg-transparent focus:outline-none cursor-pointer"
+                      className="min-w-0 max-w-[6rem] truncate bg-transparent focus:outline-none cursor-pointer sm:max-w-none"
                     >
                       <option value="position">Position</option>
                       <option value="title">Title</option>
@@ -312,6 +349,7 @@ export default function BoardPage() {
                     <button
                       onClick={() => setShareOpen(true)}
                       title="Invite members"
+                      aria-label="Invite members"
                       className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-slate-300 bg-white text-xs font-bold text-slate-500 hover:border-pink-400 hover:text-pink-500 transition-colors shadow-xs cursor-pointer ml-1.5"
                     >
                       +
@@ -326,7 +364,7 @@ export default function BoardPage() {
                 <Spinner className="h-8 w-8 text-pink-500" />
               </div>
             ) : isError ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
                 <p className="text-sm font-medium text-rose-500">
                   {(error as Error)?.message ?? "Failed to load board"}
                 </p>
@@ -338,7 +376,7 @@ export default function BoardPage() {
                 </Button>
               </div>
             ) : board ? (
-              <div className="flex-1 overflow-x-auto min-h-0">
+              <div className="-mx-4 min-h-0 flex-1 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 sm:pb-0">
                 <KanbanBoard
                   columns={filteredColumns}
                   canEdit={canEdit}
@@ -369,6 +407,25 @@ export default function BoardPage() {
             tasks={allTasks}
             activities={board?.activities || []}
           />
+
+          {/* Mobile / tablet insights drawer */}
+          {sidebarOpen ? (
+            <div className="fixed inset-0 z-40 xl:hidden">
+              <div
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                onClick={() => setSidebarOpen(false)}
+                aria-hidden="true"
+              />
+              <div className="absolute inset-y-0 right-0 w-full max-w-sm translate-x-0 transition-transform">
+                <SidebarWidgets
+                  tasks={allTasks}
+                  activities={board?.activities || []}
+                  isDrawer
+                  onClose={() => setSidebarOpen(false)}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 

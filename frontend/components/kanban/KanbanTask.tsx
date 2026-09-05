@@ -48,18 +48,18 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
           onEdit();
         }
       }}
-      className={`group relative flex flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-xs transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md cursor-grab active:cursor-grabbing select-none ${
+      className={`group relative flex min-w-0 flex-col rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md cursor-grab active:cursor-grabbing select-none sm:p-4 ${
         isDragging ? "z-20 opacity-40 ring-2 ring-indigo-400" : ""
       }`}
     >
       {/* Top row: Category Pill + action buttons */}
-      <div className="flex items-center justify-between gap-2 mb-2.5">
+      <div className="mb-2.5 flex min-w-0 items-center justify-between gap-2">
         <span
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${getTagStyle(
+          className={`inline-flex min-w-0 max-w-full items-center truncate rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${getTagStyle(
             task.category
           )}`}
         >
-          {task.category || "UI Design"}
+          <span className="truncate">{task.category || "UI Design"}</span>
         </span>
 
         <div className="flex items-center gap-0.5">
@@ -98,13 +98,13 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
       </div>
 
       {/* Task Title */}
-      <h4 className="text-[13px] font-semibold text-slate-800 leading-snug line-clamp-3 mb-3">
+      <h4 className="mb-3 text-[13px] break-words font-semibold text-slate-800 leading-snug line-clamp-3">
         {task.title}
       </h4>
 
       {/* Task Meta Footer: Date, Comments, Attachments, Assignee */}
-      <div className="flex items-center justify-between text-[11px] font-medium text-slate-400 pt-1">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 pt-1 text-[11px] font-medium text-slate-400">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
           {/* Due date */}
           <span className="flex items-center gap-1">
             <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

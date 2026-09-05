@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen flex-1 items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-4xl border border-white/80 bg-white/85 p-8 shadow-2xl shadow-purple-950/5 backdrop-blur-xl">
-        <div className="mb-8 text-center flex flex-col items-center">
+    <div className="flex min-h-screen min-h-dvh flex-1 items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-sm rounded-3xl border border-white/80 bg-white/85 p-6 shadow-2xl shadow-purple-950/5 backdrop-blur-xl sm:rounded-4xl sm:p-8">
+        <div className="mb-6 text-center flex flex-col items-center sm:mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500 font-black text-sm text-white shadow-sm shadow-pink-200">
               T
@@ -19,7 +19,7 @@ export default function RegisterPage() {
               TASK
             </span>
           </Link>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Create account</h1>
+          <h1 className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl">Create account</h1>
           <p className="text-xs text-slate-400 mt-1">Start organizing your team and tasks</p>
         </div>
         <RegisterForm />
