@@ -83,7 +83,7 @@ export function CreateTaskCard({ onCancel, onSubmit }: CreateTaskCardProps) {
         placeholder="What is the task?"
         rows={2}
         autoFocus
-        className="w-full resize-none rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all mb-3 font-medium"
+        className="w-full resize-none rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 text-xs text-slate-800 caret-pink-500 placeholder:text-slate-400 focus:bg-white focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all mb-3 font-medium"
       />
 
       <div className="flex items-center justify-between gap-2 mb-2">
@@ -151,7 +151,7 @@ export function CreateTaskCard({ onCancel, onSubmit }: CreateTaskCardProps) {
             autoFocus
             maxLength={30}
             aria-label="New category name"
-            className="h-7 min-w-0 flex-1 rounded-lg border border-indigo-200 bg-white px-2 text-[11px] font-medium text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="h-7 min-w-0 flex-1 rounded-lg border border-indigo-200 bg-white px-2 text-[11px] font-medium text-slate-800 caret-pink-500 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           />
           <button
             type="button"
@@ -228,7 +228,7 @@ export function CreateTaskCard({ onCancel, onSubmit }: CreateTaskCardProps) {
             autoFocus
             maxLength={30}
             aria-label="New assignee name"
-            className="h-7 min-w-0 flex-1 rounded-lg border border-indigo-200 bg-white px-2 text-[11px] font-medium text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="h-7 min-w-0 flex-1 rounded-lg border border-indigo-200 bg-white px-2 text-[11px] font-medium text-slate-800 caret-pink-500 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           />
           <button
             type="button"

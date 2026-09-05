@@ -3,6 +3,7 @@ import { body, param, validationResult } from "express-validator";
 import { authenticate } from "../middleware/authenticate.js";
 import { requireBoardAccess } from "../middleware/boardAccess.js";
 import { prisma } from "../lib/prisma.js";
+import { computePosition } from "../utils/fractional.js";
 
 const router = Router();
 
@@ -119,5 +120,71 @@ router.delete(
 );
 
 // POST /api/v1/columns/:columnId/tasks - create task in a column (EDITOR+)
+router.post(
+  "/:columnId/tasks",
+  authenticate,
+  param("columnId").isUUID().withMessage("Invalid columnId"),
+  body("title").notEmpty().withMessage("Title is required").trim(),
+  body("description").optional().trim(),
+  body("category").optional().trim(),
+  body("dueDate").optional().trim(),
+  body("commentsCount").optional().isInt({ min: 0 }),
+  body("attachmentsCount").optional().isInt({ min: 0 }),
+  body("assigneeId").optional().trim(),
+  async (req, res) => {
+    if (sendValidationErrors(req, res)) return;
+
+    try {
+      const boardId = await getBoardIdForColumn(p(req.params.columnId));
+      if (!boardId) {
+        res.status(404).json({ error: "Column not found" });
+        return;
+      }
+
+      if (!(await requireColumnEditor(boardId, req.user!.id, res))) return;
+
+      const lastTask = await prisma.task.findFirst({
+        where: { columnId: p(req.params.columnId) },
+        orderBy: { position: "desc" },
+        select: { position: true },
+      });
+
+      const position = computePosition(lastTask?.position ?? null, null);
+
+      const task = await prisma.task.create({
+        data: {
+          columnId: p(req.params.columnId),
+          title: req.body.title,
+          description: req.body.description ?? null,
+          category: req.body.category || "UI Design",
+          dueDate: req.body.dueDate ?? "Nov 24",
+          commentsCount: req.body.commentsCount ?? 0,
+          attachmentsCount: req.body.attachmentsCount ?? 0,
+          assigneeId: req.body.assigneeId ?? req.user!.name ?? "You",
+          position,
+          createdById: req.user!.id,
+        },
+      });
+
+      await prisma.boardActivity
+        .create({
+          data: {
+            boardId,
+            userName: req.user!.name || "Someone",
+            action: "added task",
+            target: task.title,
+            iconColor: "green",
+          },
+        })
+        .catch((e) => console.error("Activity logging error:", e));
+
+      res.status(201).json({ task });
+    } catch (error) {
+      console.error("Create task error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
 export { getBoardIdForColumn };
 export default router;

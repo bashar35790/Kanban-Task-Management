@@ -155,72 +155,6 @@ router.get(
   }
 );
 
-router.post(
-  "/columns/:columnId/tasks",
-  authenticate,
-  param("columnId").isUUID().withMessage("Invalid columnId"),
-  body("title").notEmpty().withMessage("Title is required").trim(),
-  body("description").optional().trim(),
-  body("category").optional().trim(),
-  body("dueDate").optional().trim(),
-  body("commentsCount").optional().isInt({ min: 0 }),
-  body("attachmentsCount").optional().isInt({ min: 0 }),
-  body("assigneeId").optional().trim(),
-  async (req, res) => {
-    if (sendValidationErrors(req, res)) return;
-
-    try {
-      const boardId = await getBoardIdForColumn(p(req.params.columnId));
-      if (!boardId) {
-        res.status(404).json({ error: "Column not found" });
-        return;
-      }
-
-      if (!(await requireEditor(boardId, req.user!.id, res))) return;
-
-      const lastTask = await prisma.task.findFirst({
-        where: { columnId: p(req.params.columnId) },
-        orderBy: { position: "desc" },
-        select: { position: true },
-      });
-
-      const position = computePosition(lastTask?.position ?? null, null);
-
-      const task = await prisma.task.create({
-        data: {
-          columnId: p(req.params.columnId),
-          title: req.body.title,
-          description: req.body.description ?? null,
-          category: req.body.category || "UI Design",
-          dueDate: req.body.dueDate ?? "Nov 24",
-          commentsCount: req.body.commentsCount ?? 0,
-          attachmentsCount: req.body.attachmentsCount ?? 0,
-          assigneeId: req.body.assigneeId ?? req.user!.name ?? "You",
-          position,
-          createdById: req.user!.id,
-        },
-      });
-
-      await prisma.boardActivity
-        .create({
-          data: {
-            boardId,
-            userName: req.user!.name || "Someone",
-            action: "added task",
-            target: task.title,
-            iconColor: "green",
-          },
-        })
-        .catch((e) => console.error("Activity logging error:", e));
-
-      res.status(201).json({ task });
-    } catch (error) {
-      console.error("Create task error:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
-);
-
 router.patch(
   "/:taskId",
   authenticate,
@@ -367,24 +301,55 @@ router.post(
       const afterTask = afterTaskId
         ? await prisma.task.findUnique({
             where: { id: afterTaskId },
-            select: { position: true },
+            select: { position: true, columnId: true },
           })
         : null;
 
       const beforeTask = beforeTaskId
         ? await prisma.task.findUnique({
             where: { id: beforeTaskId },
-            select: { position: true },
+            select: { position: true, columnId: true },
           })
         : null;
+
+      if (afterTaskId && !afterTask) {
+        res.status(400).json({ error: "afterTaskId does not exist" });
+        return;
+      }
+      if (beforeTaskId && !beforeTask) {
+        res.status(400).json({ error: "beforeTaskId does not exist" });
+        return;
+      }
+      if (
+        (afterTask && afterTask.columnId !== targetColumnId) ||
+        (beforeTask && beforeTask.columnId !== targetColumnId)
+      ) {
+        res.status(400).json({
+          error: "afterTaskId/beforeTaskId must belong to the target column",
+        });
+        return;
+      }
+      if (afterTaskId === taskId || beforeTaskId === taskId) {
+        res.status(400).json({
+          error: "afterTaskId/beforeTaskId cannot be the moving task itself",
+        });
+        return;
+      }
 
       const prevPos = afterTask?.position ?? null;
       const nextPos = beforeTask?.position ?? null;
 
+      if (prevPos !== null && nextPos !== null && prevPos >= nextPos) {
+        res.status(400).json({
+          error: "Inconsistent anchors: afterTask must sort before beforeTask",
+        });
+        return;
+      }
+
       const newPosition = computePosition(prevPos, nextPos);
 
-      const updatedTask = await prisma.$transaction(async (tx) => {
-        const updated = await tx.task.update({
+      await prisma.$transaction(async (tx) => {
+        await tx.task.update({
           where: { id: taskId },
           data: {
             columnId: targetColumnId as string,
@@ -412,8 +377,10 @@ router.post(
             `Rebalanced ${allPositions.length} tasks in column ${targetColumnId}`,
           );
         }
+      });
 
-        return updated;
+      const updatedTask = await prisma.task.findUnique({
+        where: { id: taskId },
       });
 
       res.json({ task: updatedTask });

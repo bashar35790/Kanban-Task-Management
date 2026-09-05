@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   DragOverlay,
   MouseSensor,
   TouchSensor,
+  MeasuringStrategy,
   closestCorners,
+  defaultDropAnimationSideEffects,
+  useDndContext,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
+import type {
+  DragStartEvent,
+  DragEndEvent,
+  DropAnimation,
+} from "@dnd-kit/core";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTask } from "./KanbanTask";
 import { AddColumnForm } from "./AddColumnForm";
@@ -20,6 +28,7 @@ import type { Column, Task } from "@/hooks/useBoard";
 type KanbanBoardProps = {
   columns: Column[];
   canEdit: boolean;
+  dragDisabled?: boolean;
   onMoveTask: (input: {
     taskId: string;
     targetColumnId: string;
@@ -34,9 +43,32 @@ type KanbanBoardProps = {
   onUpdateTask?: (taskId: string, data: any) => Promise<void>;
 };
 
+const dropAnimation: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: { active: { opacity: "0.4" } },
+  }),
+};
+
+// Rendered inside the DragOverlay. Sized exactly like the dragged card so
+// the preview stays 1:1 under the cursor (no width jump, no offset).
+function DragPreview({ task }: { task: Task }) {
+  const { active } = useDndContext();
+  const width = active?.rect.current.initial?.width ?? undefined;
+
+  return (
+    <div
+      style={width ? { width } : undefined}
+      className="pointer-events-none rounded-2xl shadow-2xl shadow-pink-200/50 ring-1 ring-pink-200"
+    >
+      <KanbanTask task={task} />
+    </div>
+  );
+}
+
 export function KanbanBoard({
   columns,
   canEdit,
+  dragDisabled,
   onMoveTask,
   onAddColumn,
   onDeleteColumn,
@@ -47,6 +79,12 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  // Portal target for the drag overlay (client-only: document is
+  // unavailable during server prerender).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: { distance: 5 },
   });
@@ -64,6 +102,7 @@ export function KanbanBoard({
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveTask(null);
+    if (dragDisabled) return;
     const { active, over } = event;
     if (!over) return;
 
@@ -118,6 +157,8 @@ export function KanbanBoard({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
+      autoScroll={{ layoutShiftCompensation: true }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
@@ -128,6 +169,7 @@ export function KanbanBoard({
             key={column.id}
             column={column}
             canEdit={canEdit}
+            dragDisabled={dragDisabled}
             onDeleteColumn={() => onDeleteColumn(column.id)}
             onUpdateColumnTitle={(title) => onUpdateColumn?.(column.id, title)}
             onAddTask={(title, category, assignee) =>
@@ -140,13 +182,17 @@ export function KanbanBoard({
         {canEdit ? <AddColumnForm onSubmit={onAddColumn} /> : null}
       </div>
 
-      <DragOverlay>
-        {activeTask ? (
-          <div className="pointer-events-none w-[78vw] max-w-[17rem] rotate-2 scale-105 shadow-2xl sm:w-72 sm:max-w-none">
-            <KanbanTask task={activeTask} />
-          </div>
-        ) : null}
-      </DragOverlay>
+      {/* Portalled to document.body so ancestor transforms/filters
+          (e.g. backdrop-blur) can't offset the fixed-position preview —
+          the card stays exactly under the cursor while dragging. */}
+      {mounted
+        ? createPortal(
+            <DragOverlay dropAnimation={dropAnimation} adjustScale={false}>
+              {activeTask ? <DragPreview task={activeTask} /> : null}
+            </DragOverlay>,
+            document.body
+          )
+        : null}
 
       {canEdit && (
         <EditTaskModal

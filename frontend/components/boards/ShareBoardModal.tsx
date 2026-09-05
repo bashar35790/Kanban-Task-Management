@@ -12,6 +12,9 @@ import { Spinner } from "@/components/ui/Spinner";
 
 const roles: BoardRole[] = ["VIEWER", "EDITOR", "OWNER"];
 
+// Invites can only grant VIEWER or EDITOR (backend rejects OWNER invites).
+const inviteRoles: BoardRole[] = ["VIEWER", "EDITOR"];
+
 const roleLabels: Record<BoardRole, string> = {
   OWNER: "Owner",
   EDITOR: "Editor",
@@ -65,7 +68,7 @@ export function ShareBoardModal({
               Role
             </span>
             <div className="flex overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/60 p-1">
-              {roles.map((role) => (
+              {inviteRoles.map((role) => (
                 <button
                   key={role}
                   type="button"

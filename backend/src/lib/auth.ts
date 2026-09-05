@@ -12,19 +12,6 @@ export const auth = betterAuth({
       ? "https://abulbashar-kanban-task-management.vercel.app"
       : "http://localhost:5000"),
   emailAndPassword: { enabled: true },
-  account: {
-    accountLinking: {
-      enabled: true,
-      trustedProviders: ["google"],
-    },
-  },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      prompt: "select_account",
-    },
-  },
   trustedOrigins: [
     process.env.FRONTEND_URL,
     "https://abulbashar-kanban-task-management.vercel.app",

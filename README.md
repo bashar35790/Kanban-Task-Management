@@ -117,7 +117,10 @@ Open <http://localhost:3000>, register, and create your first board.
 | `NODE_ENV` | `development` or `production` (controls cookie security) |
 | `PORT` | Backend port, `5000` |
 
-> In production with separate domains, the session cookie switches to `sameSite: "none"` + `secure: true` when `NODE_ENV=production`, and the backend must be served over HTTPS.
+> In production the session cookie keeps `sameSite: "lax"` with `secure: true`
+> (see `backend/src/lib/auth.ts`), so the frontend and backend must be served
+> over HTTPS. When the frontend proxies `/api/*` to the backend with rewrites,
+> the cookie is first-party and no cross-site setup is needed.
 
 ### Frontend (`frontend/.env.local`, see `.env.example`)
 
@@ -150,11 +153,16 @@ Backend env vars for production (e.g. Render):
 DATABASE_URL="postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require"
 DIRECT_URL="postgresql://postgres.yjtvearithnkebhpnyvs:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require"
 BETTER_AUTH_SECRET="<random-32-char-secret>"
-BETTER_AUTH_URL="https://your-app-name.onrender.com"
+BETTER_AUTH_URL="https://your-app.vercel.app"
 FRONTEND_URL="https://your-app.vercel.app"
 NODE_ENV=production
 PORT=5000
 ```
+
+> `BETTER_AUTH_URL` must be the **frontend** origin, not the backend origin:
+> the frontend proxies `/api/*` to the backend via rewrites
+> (`frontend/next.config.ts`), so Better Auth generates callback URLs on the
+> frontend domain and the session cookie stays first-party.
 
 Deploy steps:
 
@@ -176,7 +184,12 @@ Notes:
   statements, so it is safe behind the transaction-mode pooler.
 - `prisma.config.ts` points migrations at `DIRECT_URL` — never run migrations against
   the `:6543` transaction pooler.
-- Frontend production: set `NEXT_PUBLIC_API_URL` to the deployed backend origin.
+- Frontend production (Vercel): leave `NEXT_PUBLIC_API_URL` **empty** so the
+  browser uses relative `/api/*` URLs, which Next.js rewrites to the backend.
+  Set `BACKEND_INTERNAL_URL` to the deployed backend origin
+  (e.g. `https://your-api.onrender.com`) so the rewrites know where to proxy.
+  (Alternative: set `NEXT_PUBLIC_API_URL` to the backend origin to call it
+  directly — but then the auth cookie becomes third-party.)
 
 ---
 
@@ -226,12 +239,15 @@ All `/api/v1/*` routes require the session cookie. Role requirements are enforce
 | GET/POST | `/api/v1/boards/:boardId/members` | VIEWER+ / OWNER |
 | PATCH/DELETE | `/api/v1/boards/:boardId/members/:userId` | OWNER |
 | POST | `/api/v1/boards/:boardId/columns` | EDITOR+ |
+| GET | `/api/v1/boards/:boardId/columns` | VIEWER+ |
+| PATCH | `/api/v1/boards/:boardId/favorite` | VIEWER+ |
 | PATCH/DELETE | `/api/v1/columns/:columnId` | EDITOR+ |
 | POST | `/api/v1/columns/:columnId/tasks` | EDITOR+ |
-| PATCH/DELETE | `/api/v1/tasks/:taskId` | EDITOR+ |
+| GET | `/api/v1/tasks/columns/:columnId/tasks` | VIEWER+ |
+| GET/PATCH/DELETE | `/api/v1/tasks/:taskId` | VIEWER+ / EDITOR+ / EDITOR+ |
 | POST | `/api/v1/tasks/:taskId/move` | EDITOR+ |
 
-The move endpoint accepts `{ targetColumnId, afterTaskId?, beforeTaskId? }` and recomputes the position atomically.
+The move endpoint accepts `{ targetColumnId, afterTaskId?, beforeTaskId? }` and recomputes the position atomically. Anchors are validated (must exist, belong to the target column, and sort consistently), cross-column targets outside the task's board are rejected, and the fresh task row is returned after any rebalance.
 
 ---
 
@@ -250,6 +266,5 @@ Manual QA checklist: unauthenticated → `401`; non-member board → `403`; VIEW
 ## Known Limitations (out of scope for the MVP)
 
 - No real-time sync / WebSockets
-- No task assignees, labels, due dates, comments, or attachments
 - No email verification or OAuth providers
 - No automatic background job for float re-balancing (triggered inline on move)

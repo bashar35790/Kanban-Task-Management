@@ -95,6 +95,13 @@ export default function BoardPage() {
     return board?.columns?.flatMap((c) => c.tasks) || [];
   }, [board]);
 
+  // Drag anchors are computed from the visible task order. Disable dragging
+  // while a filter/search/sort is active so positions can't be corrupted.
+  const isViewModified =
+    filterCategory !== "ALL" ||
+    searchTaskQuery.trim() !== "" ||
+    sortBy !== "position";
+
   if (authPending) {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen">
@@ -380,6 +387,7 @@ export default function BoardPage() {
                 <KanbanBoard
                   columns={filteredColumns}
                   canEdit={canEdit}
+                  dragDisabled={!canEdit || isViewModified}
                   onMoveTask={moveTask.mutate}
                   onAddColumn={addColumn.mutate}
                   onDeleteColumn={handleDeleteColumn}

@@ -9,6 +9,7 @@ type KanbanTaskProps = {
   task: Task;
   onDelete?: () => void;
   onEdit?: () => void;
+  disabled?: boolean;
 };
 
 function getTagStyle(category: string) {
@@ -22,7 +23,7 @@ function getTagStyle(category: string) {
   return "bg-blue-50 text-blue-500 border border-blue-100";
 }
 
-export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
+export function KanbanTask({ task, onDelete, onEdit, disabled }: KanbanTaskProps) {
   const {
     attributes,
     listeners,
@@ -30,7 +31,7 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({ id: task.id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -48,7 +49,9 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
           onEdit();
         }
       }}
-      className={`group relative flex min-w-0 flex-col rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md cursor-grab active:cursor-grabbing select-none sm:p-4 ${
+      className={`group relative flex min-w-0 flex-col rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-pink-200 hover:shadow-md hover:shadow-pink-100/60 select-none sm:p-4 ${
+        disabled ? "" : "cursor-grab active:cursor-grabbing"
+      } ${
         isDragging ? "z-20 opacity-40 ring-2 ring-indigo-400" : ""
       }`}
     >
@@ -70,7 +73,7 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
                 onEdit();
               }}
               title="Edit task"
-              className="text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+              className="text-slate-400 hover:text-pink-500 hover:bg-pink-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -85,7 +88,7 @@ export function KanbanTask({ task, onDelete, onEdit }: KanbanTaskProps) {
                 onDelete();
               }}
               title="Delete task"
-              className="text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+              className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded p-1 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

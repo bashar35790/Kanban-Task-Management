@@ -10,6 +10,7 @@ import type { Column, Task } from "@/hooks/useBoard";
 type KanbanColumnProps = {
   column: Column;
   canEdit: boolean;
+  dragDisabled?: boolean;
   onDeleteColumn: () => void;
   onUpdateColumnTitle?: (title: string) => void;
   onAddTask: (title: string, category: string, assignee: string) => void;
@@ -20,6 +21,7 @@ type KanbanColumnProps = {
 export function KanbanColumn({
   column,
   canEdit,
+  dragDisabled,
   onDeleteColumn,
   onUpdateColumnTitle,
   onAddTask,
@@ -63,7 +65,7 @@ export function KanbanColumn({
                 }
               }}
               autoFocus
-              className="h-7 w-full rounded-lg border border-indigo-400 bg-white px-2 text-sm font-bold text-slate-800 shadow-xs focus:outline-none"
+              className="h-7 w-full rounded-lg border border-indigo-400 bg-white px-2 text-sm font-bold text-slate-800 caret-pink-500 shadow-xs focus:outline-none"
             />
           ) : (
             <div className="flex items-center gap-1.5 min-w-0">
@@ -119,6 +121,7 @@ export function KanbanColumn({
             <KanbanTask
               key={task.id}
               task={task}
+              disabled={dragDisabled}
               onEdit={canEdit && onEditTask ? () => onEditTask(task) : undefined}
               onDelete={canEdit ? () => onDeleteTask(task) : undefined}
             />

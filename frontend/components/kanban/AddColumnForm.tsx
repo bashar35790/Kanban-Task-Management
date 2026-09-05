@@ -41,7 +41,7 @@ export function AddColumnForm({ onSubmit }: AddColumnFormProps) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         autoFocus
-        className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:outline-none"
+        className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 caret-pink-500 placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:outline-none"
       />
       <div className="flex gap-2">
         <Button type="submit" size="sm" className="flex-1 text-xs">
